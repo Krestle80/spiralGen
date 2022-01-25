@@ -3,6 +3,11 @@ let ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+//some variables to set max frame rate
+let fps = 30;
+let framMinTime = (1000/60)*(60/fps)- (1000/60)*0.5
+let lastFrameTime = 0
+// making these global so i can update them across a couple functions
 let theta = 0
 let growth= 0
 let deltaTheta = 0
@@ -50,12 +55,10 @@ lineHandler = () =>{
     //setting up some variable to hold our starting data
     x = canvas.width/2
     y = canvas.height/2
- 
-
     currentX = x + growth*Math.cos(theta)
     if(theta === 361) theta = 0 
     ctx.beginPath();
-    ctx.arc(x + growth*Math.cos(theta), y + growth*Math.sin(theta), radius, 0, 2 * Math.PI)
+    ctx.arc(currentX, y + growth*Math.sin(theta), radius, 0, 2 * Math.PI)
     ctx.closePath()
     ctx.fillStyle = `blue`
     ctx.fill()
@@ -72,10 +75,19 @@ buttonHandler = ()=>{
     ctx.fillText("Click to make a new spiral", canvas.width/2.22, canvas.height/1.44);
 }
 
-animate= ()=>{
+
+
+animate= (time)=>{
+    if(time-lastFrameTime < framMinTime){
+        requestAnimationFrame(animate)
+        return
+    }
     lineHandler()
     buttonHandler()
+    lastFrameTime = time
     if (currentX > canvas.width) return
+
+    
     requestAnimationFrame(animate);
 }
 
