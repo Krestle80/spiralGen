@@ -3,20 +3,55 @@ let ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-frame = 0 
-//setting up some variable to hold our starting data
+let theta = 0
+let growth= 0
+let deltaTheta = 0
+let deltaGrowth = 0
+let radius = 0
+
+    //making a gloabal variable so i can stop the animation loop once the pattern leaves the screen
+let currentX = 0
+
+    //0.7612886436911847 0.2562268100311482 good dtheta and dgrowth values
+//Function to get the mouse position
+function getMousePos(canvas, event) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+    };
+}
+//Function to check whether a point is inside a rectangle
+function isInside(pos, rect){
+    return pos.x > rect.x && pos.x < rect.x+rect.width && pos.y < rect.y+rect.height && pos.y > rect.y
+}
+
+let rect = {
+    x: canvas.width/2.3, 
+    y: canvas.height/1.5, 
+    width: 200, 
+    height: 40
+    
+}
+let thetaRandomizer = () =>{
+    deltaTheta = Math.random()*(1-0.1)+0.1
+
+    return deltaTheta
+} 
+let growthRandomizer = () => {
+    deltaGrowth = Math.random()*(10)
+    return deltaGrowth
+}
+let radiusRandomizer = () => {
+    radius= Math.random()*(50-1)+1 
+    return radius    
+}
+lineHandler = () =>{
+    //setting up some variable to hold our starting data
     x = canvas.width/2
     y = canvas.height/2
-    theta = 0
-    deltaTheta = Math.random()*(1-0.1)+0.1
-    growth= 0
-    deltaGrowth = Math.random()*(10)
-    radius= Math.random()*(50-1)+1 
-    //making a gloabal variable so i can stop it once it fills the screen
-    currentX = 0
-    console.log(deltaTheta, deltaGrowth)
-    //0.7612886436911847 0.2562268100311482 good dtheta and dgrowth values
-lineHandler = () =>{
+ 
+
     currentX = x + growth*Math.cos(theta)
     if(theta === 361) theta = 0 
     ctx.beginPath();
@@ -28,11 +63,37 @@ lineHandler = () =>{
     growth += deltaGrowth
 }
 
+buttonHandler = ()=>{
+    ctx.fillStyle = 'gray'
+    ctx.fillRect(canvas.width/2, canvas.height/1.5, 100, 40)
+    ctx.fillRect(canvas.width/2, canvas.height/1.5,-100, 40 )
+    ctx.fillStyle = 'black'
+    ctx.font = "16px Arial";
+    ctx.fillText("Click to make a new spiral", canvas.width/2.22, canvas.height/1.44);
+}
+
 animate= ()=>{
     lineHandler()
+    buttonHandler()
     if (currentX > canvas.width) return
-    console.log('frame') 
-    frame ++ 
     requestAnimationFrame(animate);
 }
-animate()
+
+let startUp = () =>{
+    ctx.clearRect(0,0,canvas.width,canvas.height)
+    theta = 0
+    growth = 0
+    currentX = 0
+    deltaTheta = thetaRandomizer()
+    deltaGrowth = growthRandomizer()
+    radius = radiusRandomizer()
+    canvas.addEventListener('click', function(evt) {
+        var mousePos = getMousePos(canvas, evt);
+    
+        if (isInside(mousePos,rect)) {
+            startUp();
+        }
+    })
+    animate()
+}
+startUp()
